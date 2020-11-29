@@ -2,16 +2,12 @@ import React from 'react';
 import { 
     CardContent, CardMedia, CircularProgress, Typography, Card , IconButton, CardActions, makeStyles
 } from '@material-ui/core';
-import { PlayArrow, Save } from '@material-ui/icons'
+import { PlayArrow, Save } from '@material-ui/icons';
+import { useSubscription } from '@apollo/react-hooks';
+import { GET_SONGS } from '../graphql/subscriptions';
 
 function SongList() {
-    let loading = false;
-    
-    const song = {
-        title: 'first song title',
-        artist: 'first song artist',
-        thumbnail: 'https://hatrabbits.com/wp-content/uploads/2017/01/random.jpg',
-    } 
+    const { data, loading, error } = useSubscription(GET_SONGS);
 
     if (loading) {
         return (
@@ -26,11 +22,14 @@ function SongList() {
             </div>
         )
     }
-    return <div>
-        {Array.from({ length: 10 }, () => song).map((song, i) => (
-            <Song key={i} song={song}/>
+    if (error) return <div>error fetching songs</div>
+
+    return (<div>
+        {data.songs.map(song => (
+            <Song key={song.id} song={song}/>
         ))}
     </div>
+    )
 }
 
 const useStyles = makeStyles(theme => ({
