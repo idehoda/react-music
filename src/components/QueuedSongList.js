@@ -1,21 +1,18 @@
 import React from 'react';
 import { Typography, IconButton, makeStyles, Avatar, useMediaQuery } from '@material-ui/core';
 import { Delete } from '@material-ui/icons';
+import { useMutation, useSubscription } from '@apollo/react-hooks';
+import { ADD_OR_REMOVE_FROM_QUEUE } from '../graphql/mutations';
 
-function QueuedSongList() {
+function QueuedSongList( { queue } ) {
     const greatedThanMd = useMediaQuery(theme => theme.breakpoints.up('md'));
 
-    const song = {
-        title: 'first song title',
-        artist: 'first song artist',
-        thumbnail: 'https://hatrabbits.com/wp-content/uploads/2017/01/random.jpg',
-    }
     return greatedThanMd && (
         <div style={{ margin: '10px 0'}}>
             <Typography color='textSecondary' variant='button'>
-                Queue (5)
+                Queue ({queue.length})
             </Typography>
-            {Array.from({ length: 5}, () => song).map((song, i) => (
+            {queue.map((song, i) => (
                 <QueuedSong key={i} song={song}/>
             ))}
         </div>
@@ -46,6 +43,16 @@ const useStyles = makeStyles({
 function QueuedSong({ song }) {
     const classes = useStyles();
     const { title, artist, thumbnail } = song;
+    const [ addOrRemoveFromQueue ] = useMutation(ADD_OR_REMOVE_FROM_QUEUE, {
+        onCompleted: data => {
+            localStorage.setItem('queue', JSON.stringify(data.addOrRemoveFromQueue))
+        }
+    });
+    function handleAddOrRemoveFromQueue() {
+        addOrRemoveFromQueue({
+            variables: { input: { ...song, __typename: 'Song' }}
+        });
+    }
     return (
         <div className={classes.container}>
             <Avatar className={classes.avatar} src={thumbnail} alt='Song thumbnail' />
@@ -57,7 +64,7 @@ function QueuedSong({ song }) {
                         {artist}
                     </Typography>
                 </div>
-                <IconButton>
+                <IconButton onClick={handleAddOrRemoveFromQueue}>
                     <Delete color='error' />
                 </IconButton>
         </div>

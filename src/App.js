@@ -4,14 +4,29 @@ import AddSong from './components/AddSong';
 import SongList from './components/SongList';
 import SongPlayer from './components/SongPlayer';
 import { Grid, useMediaQuery, Hidden } from '@material-ui/core';
+import songReducer from './reducer';
+
+export const SongContext = React.createContext({
+    song: {
+        id: '91424d1b-97bd-4d3a-b75d-0d33c450db6c',
+        artist: 'NITROOO',
+        title: 'Cheat Codes [Monstercat Release]',
+        thumbnail: 'https://img.youtube.com/vi/mdaCDsN1FJ0/0.jpg',
+        url: 'https://www.youtube.com/watch?v=mdaCDsN1FJ0',
+        duration: 212
+    },
+    isPlaying: false
+})
+
 
 function App() {
-
+    const initialSongState = React.useContext(SongContext);
+    const [ state, dispatch ] = React.useReducer(songReducer, initialSongState);
     const greatedThanMd = useMediaQuery(theme => theme.breakpoints.up('md'));
     const greatedThanSm = useMediaQuery(theme => theme.breakpoints.up('sm'));
 
     return (
-    <>
+    <SongContext.Provider value={{ state, dispatch }}>
         <Hidden only='xs'>
             <Header />
         </Hidden>
@@ -44,7 +59,7 @@ function App() {
                 <SongPlayer />
             </Grid>
         </Grid>
-    </>
+    </SongContext.Provider>
     )
 }
 
